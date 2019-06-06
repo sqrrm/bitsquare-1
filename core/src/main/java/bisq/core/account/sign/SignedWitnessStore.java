@@ -15,7 +15,8 @@
  * along with Bisq. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package bisq.core.payment;
+package bisq.core.account.sign;
+
 
 import bisq.network.p2p.storage.P2PDataStorage;
 import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
@@ -41,11 +42,11 @@ import lombok.extern.slf4j.Slf4j;
  * definition and provide a hashMap for the domain access.
  */
 @Slf4j
-public class AccountAgeWitnessStore implements PersistableEnvelope {
+public class SignedWitnessStore implements PersistableEnvelope {
     @Getter
     private Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> map = new ConcurrentHashMap<>();
 
-    AccountAgeWitnessStore() {
+    SignedWitnessStore() {
     }
 
 
@@ -53,28 +54,28 @@ public class AccountAgeWitnessStore implements PersistableEnvelope {
     // PROTO BUFFER
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-    private AccountAgeWitnessStore(List<AccountAgeWitness> list) {
+    private SignedWitnessStore(List<SignedWitness> list) {
         list.forEach(item -> map.put(new P2PDataStorage.ByteArray(item.getHash()), item));
     }
 
     public Message toProtoMessage() {
         return PB.PersistableEnvelope.newBuilder()
-                .setAccountAgeWitnessStore(getBuilder())
+                .setSignedWitnessStore(getBuilder())
                 .build();
     }
 
-    private PB.AccountAgeWitnessStore.Builder getBuilder() {
-        final List<PB.AccountAgeWitness> protoList = map.values().stream()
-                .map(payload -> (AccountAgeWitness) payload)
-                .map(AccountAgeWitness::toProtoAccountAgeWitness)
+    private PB.SignedWitnessStore.Builder getBuilder() {
+        final List<PB.SignedWitness> protoList = map.values().stream()
+                .map(payload -> (SignedWitness) payload)
+                .map(SignedWitness::toProtoSignedWitness)
                 .collect(Collectors.toList());
-        return PB.AccountAgeWitnessStore.newBuilder().addAllItems(protoList);
+        return PB.SignedWitnessStore.newBuilder().addAllItems(protoList);
     }
 
-    public static PersistableEnvelope fromProto(PB.AccountAgeWitnessStore proto) {
-        List<AccountAgeWitness> list = proto.getItemsList().stream()
-                .map(AccountAgeWitness::fromProto).collect(Collectors.toList());
-        return new AccountAgeWitnessStore(list);
+    public static PersistableEnvelope fromProto(PB.SignedWitnessStore proto) {
+        List<SignedWitness> list = proto.getItemsList().stream()
+                .map(SignedWitness::fromProto).collect(Collectors.toList());
+        return new SignedWitnessStore(list);
     }
 
     public boolean containsKey(P2PDataStorage.ByteArray hash) {
