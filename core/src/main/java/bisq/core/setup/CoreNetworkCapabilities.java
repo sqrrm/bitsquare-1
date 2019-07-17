@@ -32,6 +32,7 @@ public class CoreNetworkCapabilities {
                 Capability.TRADE_STATISTICS_2,
                 Capability.ACCOUNT_AGE_WITNESS,
                 Capability.ACK_MSG,
+                Capability.BUNDLE_OF_ENVELOPES,
                 Capability.SIGNED_ACCOUNT_AGE_WITNESS);
 
         if (BisqEnvironment.isDaoActivated(bisqEnvironment)) {
