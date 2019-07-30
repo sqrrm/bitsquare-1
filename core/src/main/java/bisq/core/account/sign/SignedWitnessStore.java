@@ -23,8 +23,6 @@ import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
 
 import bisq.common.proto.persistable.PersistableEnvelope;
 
-import io.bisq.generated.protobuffer.PB;
-
 import com.google.protobuf.Message;
 
 import java.util.List;
@@ -37,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 
 
 /**
- * We store only the payload in the PB file to save disc space. The hash of the payload can be created anyway and
+ * We store only the payload in the protobuf file to save disc space. The hash of the payload can be created anyway and
  * is only used as key in the map. So we have a hybrid data structure which is represented as list in the protobuffer
  * definition and provide a hashMap for the domain access.
  */
@@ -59,20 +57,20 @@ public class SignedWitnessStore implements PersistableEnvelope {
     }
 
     public Message toProtoMessage() {
-        return PB.PersistableEnvelope.newBuilder()
+        return protobuf.PersistableEnvelope.newBuilder()
                 .setSignedWitnessStore(getBuilder())
                 .build();
     }
 
-    private PB.SignedWitnessStore.Builder getBuilder() {
-        final List<PB.SignedWitness> protoList = map.values().stream()
+    private protobuf.SignedWitnessStore.Builder getBuilder() {
+        final List<protobuf.SignedWitness> protoList = map.values().stream()
                 .map(payload -> (SignedWitness) payload)
                 .map(SignedWitness::toProtoSignedWitness)
                 .collect(Collectors.toList());
-        return PB.SignedWitnessStore.newBuilder().addAllItems(protoList);
+        return protobuf.SignedWitnessStore.newBuilder().addAllItems(protoList);
     }
 
-    public static PersistableEnvelope fromProto(PB.SignedWitnessStore proto) {
+    public static PersistableEnvelope fromProto(protobuf.SignedWitnessStore proto) {
         List<SignedWitness> list = proto.getItemsList().stream()
                 .map(SignedWitness::fromProto).collect(Collectors.toList());
         return new SignedWitnessStore(list);

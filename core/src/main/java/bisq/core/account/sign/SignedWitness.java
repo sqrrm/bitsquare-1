@@ -29,8 +29,6 @@ import bisq.common.crypto.Hash;
 import bisq.common.proto.persistable.PersistableEnvelope;
 import bisq.common.util.Utilities;
 
-import io.bisq.generated.protobuffer.PB;
-
 import com.google.protobuf.ByteString;
 
 import org.bitcoinj.core.Coin;
@@ -91,8 +89,8 @@ public class SignedWitness implements LazyProcessedPayload, PersistableNetworkPa
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public PB.PersistableNetworkPayload toProtoMessage() {
-        final PB.SignedWitness.Builder builder = PB.SignedWitness.newBuilder()
+    public protobuf.PersistableNetworkPayload toProtoMessage() {
+        final protobuf.SignedWitness.Builder builder = protobuf.SignedWitness.newBuilder()
                 .setSignedByArbitrator(signedByArbitrator)
                 .setWitnessHash(ByteString.copyFrom(witnessHash))
                 .setSignature(ByteString.copyFrom(signature))
@@ -100,14 +98,14 @@ public class SignedWitness implements LazyProcessedPayload, PersistableNetworkPa
                 .setWitnessOwnerPubKey(ByteString.copyFrom(witnessOwnerPubKey))
                 .setDate(date)
                 .setTradeAmount(tradeAmount);
-        return PB.PersistableNetworkPayload.newBuilder().setSignedWitness(builder).build();
+        return protobuf.PersistableNetworkPayload.newBuilder().setSignedWitness(builder).build();
     }
 
-    public PB.SignedWitness toProtoSignedWitness() {
+    public protobuf.SignedWitness toProtoSignedWitness() {
         return toProtoMessage().getSignedWitness();
     }
 
-    public static SignedWitness fromProto(PB.SignedWitness proto) {
+    public static SignedWitness fromProto(protobuf.SignedWitness proto) {
         return new SignedWitness(proto.getSignedByArbitrator(),
                 proto.getWitnessHash().toByteArray(),
                 proto.getSignature().toByteArray(),
