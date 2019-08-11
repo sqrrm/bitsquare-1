@@ -50,7 +50,7 @@ public abstract class ExecutableForAppWithP2p extends BisqExecutable implements 
     private static final long MAX_MEMORY_MB_DEFAULT = 500;
     private static final long CHECK_MEMORY_PERIOD_SEC = 300;
     private static final long CHECK_SHUTDOWN = TimeUnit.HOURS.toMillis(1);
-    private static final long SHUTDOWN_INTERVAL = TimeUnit.HOURS.toMillis(24);
+    private static final long SHUTDOWN_INTERVAL = TimeUnit.HOURS.toMillis(4);
     private volatile boolean stopped;
     private final long startTime = System.currentTimeMillis();
     private static long maxMemory = MAX_MEMORY_MB_DEFAULT;
