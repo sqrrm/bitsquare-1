@@ -491,7 +491,7 @@ public class VoteResultService implements DaoStateListener, DaoSetupService {
         BiFunction<byte[], List<BlindVote>, Boolean> predicate = (hash, variation) ->
                 isListMatchingMajority(hash, variation, false);
 
-        List<BlindVote> result = PermutationUtil.findMatchingPermutation(majorityVoteListHash, list, predicate, 1000000);
+        List<BlindVote> result = PermutationUtil.findMatchingPermutation(majorityVoteListHash, list, predicate, 100000);
         log.info("findPermutatedListMatchingMajority for {} items took {} ms.",
                 list.size(), (System.currentTimeMillis() - ts));
         if (result.isEmpty()) {

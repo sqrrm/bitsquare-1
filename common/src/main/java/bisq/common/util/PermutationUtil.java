@@ -18,8 +18,6 @@
 package bisq.common.util;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -31,56 +29,85 @@ import lombok.extern.slf4j.Slf4j;
 public class PermutationUtil {
 
     /**
-     * @param list                  Original list
-     * @param indicesToRemove       List of indices to remove
-     * @param <T>                   Type of List items
-     * @return Partial list where items at indices of indicesToRemove have been removed
+     *
+     * Finds a permutation of the list which matches the given predicate. The list is ordered and the algorithm does
+     * not (need to) support changes in the order.
+     *
+     * Example of all iterations for a 5 element list
+     * [0, 1, 2, 3, 4]
+     * [1, 2, 3, 4]
+     * [0, 2, 3, 4]
+     * [0, 1, 3, 4]
+     * [0, 1, 2, 4]
+     * [0, 1, 2, 3]
+     * [2, 3, 4]
+     * [1, 3, 4]
+     * [1, 2, 4]
+     * [1, 2, 3]
+     * [0, 3, 4]
+     * [0, 2, 4]
+     * [0, 2, 3]
+     * [0, 1, 4]
+     * [0, 1, 3]
+     * [0, 1, 2]
+     * [3, 4]
+     * [2, 4]
+     * [2, 3]
+     * [1, 4]
+     * [1, 3]
+     * [1, 2]
+     * [0, 4]
+     * [0, 3]
+     * [0, 2]
+     * [0, 1]
+     * [4]
+     * [3]
+     * [2]
+     * [1]
+     * [0]
+     * []
+     *
+     * @param targetValue           Expected value for testing predicate
+     * @param list                  List from which we want to find a permutation matching our predicate condition
+     * @param predicate             Predicate used to determine our matching criteria
+     * @param maxNumPredicateTests  Max. number of predicate tests
+     * @param <T>                   Type of list items
+     * @param <R>                   Type of predicate targetValue
+     * @return Permutated list which matches our predicate. If nothing found or the limit is
+     *                              reached we return an empty Array
      */
-    public static <T> List<T> getPartialList(List<T> list, List<Integer> indicesToRemove) {
-        List<T> altered = new ArrayList<>(list);
-
-        // Eliminate duplicates
-        indicesToRemove = new ArrayList<>(new HashSet<>(indicesToRemove));
-
-        // Sort
-        Collections.sort(indicesToRemove);
-
-        // Reverse list.
-        // We need to remove from highest index downwards to not change order of remaining indices
-        Collections.reverse(indicesToRemove);
-
-        indicesToRemove.forEach(index -> {
-            if (altered.size() > index && index >= 0)
-                altered.remove((int) index);
-        });
-        return altered;
-    }
-
     public static <T, R> List<T> findMatchingPermutation(R targetValue,
                                                          List<T> list,
                                                          BiFunction<R, List<T>, Boolean> predicate,
-                                                         int maxIterations) {
+                                                         int maxNumPredicateTests) {
+        AtomicInteger numRemainingTests = new AtomicInteger(maxNumPredicateTests);
+        numRemainingTests.getAndDecrement();
         if (predicate.apply(targetValue, list)) {
             return list;
         } else {
             return findMatchingPermutation(targetValue,
                     list,
-                    new ArrayList<>(),
                     predicate,
-                    new AtomicInteger(maxIterations));
+                    maxNumPredicateTests,
+                    numRemainingTests);
         }
     }
 
     private static <T, R> List<T> findMatchingPermutation(R targetValue,
                                                           List<T> list,
-                                                          List<List<T>> lists,
                                                           BiFunction<R, List<T>, Boolean> predicate,
-                                                          AtomicInteger maxIterations) {
+                                                          int maxNumPredicateTests,
+                                                          AtomicInteger numRemainingTests) {
         for (int level = 0; level < list.size(); level++) {
             // Test one level at a time
-            var result = checkLevel(targetValue, list, predicate, level, 0, maxIterations);
+            var result = checkLevel(targetValue, list, predicate, level, 0, numRemainingTests);
             if (!result.isEmpty()) {
                 return result;
+            }
+
+            if (numRemainingTests.get() <= 0) {
+                log.warn("We hit the limit of predicate tests of {}", maxNumPredicateTests);
+                return new ArrayList<>();
             }
         }
 
@@ -93,85 +120,30 @@ public class PermutationUtil {
                                              BiFunction<R, List<T>, Boolean> predicate,
                                              int level,
                                              int permutationIndex,
-                                             AtomicInteger maxIterations) {
+                                             AtomicInteger numRemainingTests) {
         if (previousLevel.size() == 1) {
             return new ArrayList<>();
         }
         for (int i = permutationIndex; i < previousLevel.size(); i++) {
-            if (maxIterations.get() <= 0) {
+            if (numRemainingTests.get() <= 0) {
                 return new ArrayList<>();
             }
             List<T> newList = new ArrayList<>(previousLevel);
             newList.remove(i);
             if (level == 0) {
-                maxIterations.decrementAndGet();
+                numRemainingTests.decrementAndGet();
                 // Check all permutations on this level
                 if (predicate.apply(targetValue, newList)) {
                     return newList;
                 }
             } else {
                 // Test next level
-                var result = checkLevel(targetValue, newList, predicate, level - 1, i, maxIterations);
+                var result = checkLevel(targetValue, newList, predicate, level - 1, i, numRemainingTests);
                 if (!result.isEmpty()) {
                     return result;
                 }
             }
         }
         return new ArrayList<>();
-    }
-
-    //TODO optimize algorithm so that it starts from all objects and goes down instead starting with from the bottom.
-    // That should help that we are not hitting the iteration limit so easily.
-
-    /**
-     * Returns a list of all possible permutations of a give sorted list ignoring duplicates.
-     * E.g. List [A,B,C] results in this list of permutations: [[A], [B], [A,B], [C], [A,C], [B,C], [A,B,C]]
-     * Number of variations and iterations grows with 2^n - 1 where n is the number of items in the list.
-     * With 20 items we reach about 1 million iterations and it takes about 0.5 sec.
-     * To avoid performance issues we added the maxIterations parameter to stop once the number of iterations has
-     * reached the maxIterations and return in such a case the list of permutations we have been able to create.
-     * Depending on the type of object which is stored in the list the memory usage should be considered as well for
-     * choosing the right maxIterations value.
-     *
-     * @param list              List from which we create permutations
-     * @param maxIterations     Max. number of iterations including inner iterations
-     * @param <T>               Type of list items
-     * @return List of possible permutations of the original list
-     */
-    public static <T> List<List<T>> findAllPermutations(List<T> list, int maxIterations) {
-        List<List<T>> result = new ArrayList<>();
-        int counter = 0;
-        long ts = System.currentTimeMillis();
-        for (T item : list) {
-            counter++;
-            if (counter > maxIterations) {
-                log.warn("We reached maxIterations of our allowed iterations and return current state of the result. " +
-                        "counter={}", counter);
-                return result;
-            }
-
-            List<List<T>> subLists = new ArrayList<>();
-            for (int n = 0; n < result.size(); n++) {
-                counter++;
-                if (counter > maxIterations) {
-                    log.warn("We reached maxIterations of our allowed iterations and return current state of the result. " +
-                            "counter={}", counter);
-                    return result;
-                }
-                List<T> subList = new ArrayList<>(result.get(n));
-                subList.add(item);
-                subLists.add(subList);
-            }
-
-            // add single item
-            result.add(new ArrayList<>(Collections.singletonList(item)));
-
-            // add subLists
-            result.addAll(subLists);
-        }
-
-        log.info("findAllPermutations took {} ms for {} items and {} iterations. Heap size used: {} MB",
-                (System.currentTimeMillis() - ts), list.size(), counter, Profiler.getUsedMemoryInMB());
-        return result;
     }
 }
