@@ -343,7 +343,7 @@ public class VoteResultService implements DaoStateListener, DaoSetupService {
             // We lookup for the proposals we have in our local list which match the txId from the
             // voteWithProposalTxIdList and create a ballot list with the proposal and the vote from
             // the voteWithProposalTxIdList
-            BallotList ballotList = createBallotList(voteWithProposalTxIdList);
+            BallotList ballotList = createBallotList(voteWithProposalTxIdList, blindVoteStake);
             log.debug("Add entry to decryptedBallotsWithMeritsSet: blindVoteTxId={}, voteRevealTxId={}, blindVoteStake={}, ballotList={}",
                     blindVoteTxId, voteRevealTxId, blindVoteStake, ballotList);
             return new DecryptedBallotsWithMerits(hashOfBlindVoteList, blindVoteTxId, voteRevealTxId, blindVoteStake, ballotList, meritList);
@@ -357,7 +357,7 @@ public class VoteResultService implements DaoStateListener, DaoSetupService {
         }
     }
 
-    private BallotList createBallotList(VoteWithProposalTxIdList voteWithProposalTxIdList)
+    private BallotList createBallotList(VoteWithProposalTxIdList voteWithProposalTxIdList, long blindVoteStake)
             throws VoteResultException.MissingBallotException {
         // voteWithProposalTxIdList is the list of ProposalTxId + vote from the blind vote (decrypted vote data)
 
@@ -412,14 +412,20 @@ public class VoteResultService implements DaoStateListener, DaoSetupService {
         if (!missingBallots.isEmpty())
             throw new VoteResultException.MissingBallotException(ballots, missingBallots);
 
-        // If we received a proposal after we had already voted we consider it as a proposal withhold attack and
-        // treat the proposal as it was voted with a rejected vote.
+        // If we received a vote with a missing proposal we set it to rejected to avoid
+        // a withhold attack.
+        // An attacker could withhold his proposal to the network and
+        // be the only voter (accepting it). Once all have voted he publishes it
+        // and as other voters would not have that proposal in their list they have not
+        // voted on it (same as ignore) and the attacker would get his fraudulent proposal
+        // accepted as he was the only voter. To avoid that we set all missing proposals to rejected.
         ballotByTxIdMap.entrySet().stream()
-                .filter(e -> !voteByTxIdMap.keySet().contains(e.getKey()))
+                .filter(e -> !voteByTxIdMap.containsKey(e.getKey()))
                 .map(Map.Entry::getValue)
                 .forEach(ballot -> {
-                    log.warn("We have a proposal which was not part of our blind vote and reject it. " +
-                            "Proposal ={}" + ballot.getProposal());
+                    log.warn("We received a vote which does not contain all available proposals. " +
+                            "To avoid an attack we set any missing proposal of that vote to rejected. " +
+                            "Proposal ={}, blindVoteStake={}", ballot.getProposal(), blindVoteStake);
                     ballots.add(new Ballot(ballot.getProposal(), new Vote(false)));
                 });
 
