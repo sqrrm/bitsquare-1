@@ -241,6 +241,9 @@ public class AccountAgeWitnessService {
         byte[] hash = Hash.getSha256Ripemd160hash(Utilities.concatenateByteArrays(accountInputDataWithSalt,
                 pubKeyRing.getSignaturePubKeyBytes()));
 
+        // Debugging missing account age witness hash
+        log.info("Finding witness for paymentAccountPayload={} with pubKeyRing={} inputdata={} generated hash={}",
+                paymentAccountPayload, pubKeyRing, accountInputDataWithSalt, hash);
         return getWitnessByHash(hash);
     }
 
@@ -427,7 +430,10 @@ public class AccountAgeWitnessService {
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     public AccountAgeWitness getMyWitness(PaymentAccountPayload paymentAccountPayload) {
+        // Debugging missing account age witness hash
+        log.info("paymentAccountPayload={}", paymentAccountPayload);
         final Optional<AccountAgeWitness> accountAgeWitnessOptional = findWitness(paymentAccountPayload, keyRing.getPubKeyRing());
+        accountAgeWitnessOptional.ifPresent(w -> log.info("Found witness {}", w.toString()));
         return accountAgeWitnessOptional.orElseGet(() -> getNewWitness(paymentAccountPayload, keyRing.getPubKeyRing()));
     }
 
