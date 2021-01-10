@@ -88,10 +88,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
-import java.text.DecimalFormat;
-
 import javafx.util.Callback;
 import javafx.util.StringConverter;
+
+import java.text.DecimalFormat;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;

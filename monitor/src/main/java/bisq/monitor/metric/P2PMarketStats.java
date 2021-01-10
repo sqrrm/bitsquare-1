@@ -19,7 +19,7 @@ package bisq.monitor.metric;
 
 import bisq.monitor.Reporter;
 
-import bisq.core.offer.OfferPayload;
+import bisq.core.offer.FeeTxOfferPayload;
 
 import bisq.network.p2p.NodeAddress;
 import bisq.network.p2p.network.Connection;
@@ -79,8 +79,8 @@ public class P2PMarketStats extends P2PSeedNodeSnapshotBase {
     private abstract static class OfferStatistics<T> extends Statistics<T> {
         @Override
         public synchronized void log(Object message) {
-            if (message instanceof OfferPayload) {
-                OfferPayload currentMessage = (OfferPayload) message;
+            if (message instanceof FeeTxOfferPayload) {
+                FeeTxOfferPayload currentMessage = (FeeTxOfferPayload) message;
                 // For logging different data types
                 String market = currentMessage.getDirection() + "." + currentMessage.getBaseCurrencyCode() + "_" + currentMessage.getCounterCurrencyCode();
 
@@ -88,13 +88,13 @@ public class P2PMarketStats extends P2PSeedNodeSnapshotBase {
             }
         }
 
-        abstract void process(String market, OfferPayload currentMessage);
+        abstract void process(String market, FeeTxOfferPayload currentMessage);
     }
 
     private class OfferCountStatistics extends OfferStatistics<Aggregator> {
 
         @Override
-        void process(String market, OfferPayload currentMessage) {
+        void process(String market, FeeTxOfferPayload currentMessage) {
             buckets.putIfAbsent(market, new Aggregator());
             buckets.get(market).increment();
         }
@@ -103,7 +103,7 @@ public class P2PMarketStats extends P2PSeedNodeSnapshotBase {
     private class OfferVolumeStatistics extends OfferStatistics<Aggregator> {
 
         @Override
-        void process(String market, OfferPayload currentMessage) {
+        void process(String market, FeeTxOfferPayload currentMessage) {
             buckets.putIfAbsent(market, new Aggregator());
             buckets.get(market).add(currentMessage.getAmount());
         }
@@ -112,7 +112,7 @@ public class P2PMarketStats extends P2PSeedNodeSnapshotBase {
     private class OfferVolumeDistributionStatistics extends OfferStatistics<List<Long>> {
 
         @Override
-        void process(String market, OfferPayload currentMessage) {
+        void process(String market, FeeTxOfferPayload currentMessage) {
             buckets.putIfAbsent(market, new ArrayList<>());
             buckets.get(market).add(currentMessage.getAmount());
         }
@@ -121,7 +121,7 @@ public class P2PMarketStats extends P2PSeedNodeSnapshotBase {
     private class OffersPerTraderStatistics extends OfferStatistics<Map<NodeAddress, Aggregator>> {
 
         @Override
-        void process(String market, OfferPayload currentMessage) {
+        void process(String market, FeeTxOfferPayload currentMessage) {
             buckets.putIfAbsent(market, new HashMap<>());
             buckets.get(market).putIfAbsent(currentMessage.getOwnerNodeAddress(), new Aggregator());
             buckets.get(market).get(currentMessage.getOwnerNodeAddress()).increment();
@@ -131,7 +131,7 @@ public class P2PMarketStats extends P2PSeedNodeSnapshotBase {
     private class VolumePerTraderStatistics extends OfferStatistics<Map<NodeAddress, Aggregator>> {
 
         @Override
-        void process(String market, OfferPayload currentMessage) {
+        void process(String market, FeeTxOfferPayload currentMessage) {
             buckets.putIfAbsent(market, new HashMap<>());
             buckets.get(market).putIfAbsent(currentMessage.getOwnerNodeAddress(), new Aggregator());
             buckets.get(market).get(currentMessage.getOwnerNodeAddress()).add(currentMessage.getAmount());
@@ -143,8 +143,8 @@ public class P2PMarketStats extends P2PSeedNodeSnapshotBase {
         @Override
         public void log(Object message) {
 
-            if (message instanceof OfferPayload) {
-                OfferPayload currentMessage = (OfferPayload) message;
+            if (message instanceof FeeTxOfferPayload) {
+                FeeTxOfferPayload currentMessage = (FeeTxOfferPayload) message;
 
                 String version = "v" + currentMessage.getId().substring(currentMessage.getId().lastIndexOf("-") + 1);
 

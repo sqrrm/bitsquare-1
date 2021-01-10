@@ -21,6 +21,7 @@ import bisq.core.monetary.Altcoin;
 import bisq.core.monetary.AltcoinExchangeRate;
 import bisq.core.monetary.Price;
 import bisq.core.monetary.Volume;
+import bisq.core.offer.FeeTxOfferPayload;
 import bisq.core.offer.Offer;
 import bisq.core.offer.OfferPayload;
 import bisq.core.trade.Trade;
@@ -137,7 +138,7 @@ public final class TradeStatistics2 implements ProcessOncePersistableNetworkPayl
     @JsonExclude
     private Map<String, String> extraDataMap;
 
-    public TradeStatistics2(OfferPayload offerPayload,
+    public TradeStatistics2(FeeTxOfferPayload offerPayload,
                             Price tradePrice,
                             Coin tradeAmount,
                             Date tradeDate,

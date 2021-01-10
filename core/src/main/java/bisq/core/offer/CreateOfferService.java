@@ -202,7 +202,7 @@ public class CreateOfferService {
                 currencyCode,
                 makerFeeAsCoin);
 
-        OfferPayload offerPayload = new OfferPayload(offerId,
+        FeeTxOfferPayload offerPayload = new FeeTxOfferPayload(offerId,
                 creationTime,
                 makerAddress,
                 pubKeyRing,

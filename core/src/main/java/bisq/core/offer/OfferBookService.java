@@ -88,8 +88,8 @@ public class OfferBookService {
             @Override
             public void onAdded(Collection<ProtectedStorageEntry> protectedStorageEntries) {
                 protectedStorageEntries.forEach(protectedStorageEntry -> offerBookChangedListeners.forEach(listener -> {
-                    if (protectedStorageEntry.getProtectedStoragePayload() instanceof OfferPayload) {
-                        OfferPayload offerPayload = (OfferPayload) protectedStorageEntry.getProtectedStoragePayload();
+                    if (protectedStorageEntry.getProtectedStoragePayload() instanceof FeeTxOfferPayload) {
+                        FeeTxOfferPayload offerPayload = (FeeTxOfferPayload) protectedStorageEntry.getProtectedStoragePayload();
                         Offer offer = new Offer(offerPayload);
                         offer.setPriceFeedService(priceFeedService);
                         listener.onAdded(offer);
@@ -100,8 +100,8 @@ public class OfferBookService {
             @Override
             public void onRemoved(Collection<ProtectedStorageEntry> protectedStorageEntries) {
                 protectedStorageEntries.forEach(protectedStorageEntry -> offerBookChangedListeners.forEach(listener -> {
-                    if (protectedStorageEntry.getProtectedStoragePayload() instanceof OfferPayload) {
-                        OfferPayload offerPayload = (OfferPayload) protectedStorageEntry.getProtectedStoragePayload();
+                    if (protectedStorageEntry.getProtectedStoragePayload() instanceof FeeTxOfferPayload) {
+                        FeeTxOfferPayload offerPayload = (FeeTxOfferPayload) protectedStorageEntry.getProtectedStoragePayload();
                         Offer offer = new Offer(offerPayload);
                         offer.setPriceFeedService(priceFeedService);
                         listener.onRemoved(offer);
@@ -150,7 +150,7 @@ public class OfferBookService {
         }
     }
 
-    public void refreshTTL(OfferPayload offerPayload,
+    public void refreshTTL(FeeTxOfferPayload offerPayload,
                            ResultHandler resultHandler,
                            ErrorMessageHandler errorMessageHandler) {
         if (filterManager.requireUpdateToNewVersionForTrading()) {
@@ -172,13 +172,13 @@ public class OfferBookService {
         addOffer(offer, resultHandler, errorMessageHandler);
     }
 
-    public void deactivateOffer(OfferPayload offerPayload,
+    public void deactivateOffer(FeeTxOfferPayload offerPayload,
                                 @Nullable ResultHandler resultHandler,
                                 @Nullable ErrorMessageHandler errorMessageHandler) {
         removeOffer(offerPayload, resultHandler, errorMessageHandler);
     }
 
-    public void removeOffer(OfferPayload offerPayload,
+    public void removeOffer(FeeTxOfferPayload offerPayload,
                             @Nullable ResultHandler resultHandler,
                             @Nullable ErrorMessageHandler errorMessageHandler) {
         if (p2PService.removeData(offerPayload)) {
@@ -192,9 +192,9 @@ public class OfferBookService {
 
     public List<Offer> getOffers() {
         return p2PService.getDataMap().values().stream()
-                .filter(data -> data.getProtectedStoragePayload() instanceof OfferPayload)
+                .filter(data -> data.getProtectedStoragePayload() instanceof FeeTxOfferPayload)
                 .map(data -> {
-                    OfferPayload offerPayload = (OfferPayload) data.getProtectedStoragePayload();
+                    FeeTxOfferPayload offerPayload = (FeeTxOfferPayload) data.getProtectedStoragePayload();
                     Offer offer = new Offer(offerPayload);
                     offer.setPriceFeedService(priceFeedService);
                     return offer;
@@ -202,7 +202,7 @@ public class OfferBookService {
                 .collect(Collectors.toList());
     }
 
-    public void removeOfferAtShutDown(OfferPayload offerPayload) {
+    public void removeOfferAtShutDown(FeeTxOfferPayload offerPayload) {
         removeOffer(offerPayload, null, null);
     }
 

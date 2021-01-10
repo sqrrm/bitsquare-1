@@ -94,7 +94,7 @@ public class Offer implements NetworkPayload, PersistablePayload {
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     @Getter
-    private final OfferPayload offerPayload;
+    private final FeeTxOfferPayload offerPayload;
     @JsonExclude
     @Getter
     final transient private ObjectProperty<Offer.State> stateProperty = new SimpleObjectProperty<>(Offer.State.UNKNOWN);
@@ -119,7 +119,7 @@ public class Offer implements NetworkPayload, PersistablePayload {
     // Constructor
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-    public Offer(OfferPayload offerPayload) {
+    public Offer(FeeTxOfferPayload offerPayload) {
         this.offerPayload = offerPayload;
     }
 
@@ -134,7 +134,7 @@ public class Offer implements NetworkPayload, PersistablePayload {
     }
 
     public static Offer fromProto(protobuf.Offer proto) {
-        return new Offer(OfferPayload.fromProto(proto.getOfferPayload()));
+        return new Offer(FeeTxOfferPayload.fromProto(proto.getOfferPayload()));
     }
 
 
