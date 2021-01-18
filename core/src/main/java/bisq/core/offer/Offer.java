@@ -96,11 +96,6 @@ public class Offer implements NetworkPayload, PersistablePayload {
     @Getter
     private final OfferPayload offerPayload;
 
-    // TODO(sq) refactor all usages of getOfferPayload to handle OfferPayload
-    public FeeTxOfferPayload getOfferPayload() {
-        return (FeeTxOfferPayload) offerPayload;
-    }
-
     @JsonExclude
     @Getter
     final transient private ObjectProperty<Offer.State> stateProperty = new SimpleObjectProperty<>(Offer.State.UNKNOWN);

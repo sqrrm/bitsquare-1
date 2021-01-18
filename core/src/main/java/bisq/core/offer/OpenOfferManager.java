@@ -772,7 +772,10 @@ public class OpenOfferManager implements PeerManager.Listener, DecryptedDirectMe
         openOffersClone.forEach(originalOpenOffer -> {
             Offer originalOffer = originalOpenOffer.getOffer();
 
-            FeeTxOfferPayload originalOfferPayload = originalOffer.getOfferPayload();
+            if (!(originalOffer.getOfferPayload() instanceof FeeTxOfferPayload)) {
+                return;
+            }
+            FeeTxOfferPayload originalOfferPayload = (FeeTxOfferPayload) originalOffer.getOfferPayload();
             // We added CAPABILITIES with entry for Capability.MEDIATION in v1.1.6 and
             // Capability.REFUND_AGENT in v1.2.0 and want to rewrite a
             // persisted offer after the user has updated to 1.2.0 so their offer will be accepted by the network.

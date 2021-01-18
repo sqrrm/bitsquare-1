@@ -186,8 +186,11 @@ class EditOfferDataModel extends MutableOfferDataModel {
         // editedPayload is a merge of the original offerPayload and newOfferPayload
         // fields which are editable are merged in from newOfferPayload (such as payment account details)
         // fields which cannot change (most importantly BTC amount) are sourced from the original offerPayload
-        final FeeTxOfferPayload offerPayload = openOffer.getOffer().getOfferPayload();
-        final FeeTxOfferPayload newOfferPayload = createAndGetOffer().getOfferPayload();
+        if (!(openOffer.getOffer().getOfferPayload() instanceof FeeTxOfferPayload)) {
+            return;
+        }
+        final FeeTxOfferPayload offerPayload = (FeeTxOfferPayload) openOffer.getOffer().getOfferPayload();
+        final FeeTxOfferPayload newOfferPayload = (FeeTxOfferPayload) createAndGetOffer().getOfferPayload();
         final FeeTxOfferPayload editedPayload = new FeeTxOfferPayload(offerPayload.getId(),
                 offerPayload.getDate(),
                 offerPayload.getOwnerNodeAddress(),

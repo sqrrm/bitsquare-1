@@ -150,7 +150,7 @@ public class OfferBookService {
         }
     }
 
-    public void refreshTTL(FeeTxOfferPayload offerPayload,
+    public void refreshTTL(OfferPayload offerPayload,
                            ResultHandler resultHandler,
                            ErrorMessageHandler errorMessageHandler) {
         if (filterManager.requireUpdateToNewVersionForTrading()) {
@@ -172,13 +172,13 @@ public class OfferBookService {
         addOffer(offer, resultHandler, errorMessageHandler);
     }
 
-    public void deactivateOffer(FeeTxOfferPayload offerPayload,
+    public void deactivateOffer(OfferPayload offerPayload,
                                 @Nullable ResultHandler resultHandler,
                                 @Nullable ErrorMessageHandler errorMessageHandler) {
         removeOffer(offerPayload, resultHandler, errorMessageHandler);
     }
 
-    public void removeOffer(FeeTxOfferPayload offerPayload,
+    public void removeOffer(OfferPayload offerPayload,
                             @Nullable ResultHandler resultHandler,
                             @Nullable ErrorMessageHandler errorMessageHandler) {
         if (p2PService.removeData(offerPayload)) {
@@ -202,7 +202,7 @@ public class OfferBookService {
                 .collect(Collectors.toList());
     }
 
-    public void removeOfferAtShutDown(FeeTxOfferPayload offerPayload) {
+    public void removeOfferAtShutDown(OfferPayload offerPayload) {
         removeOffer(offerPayload, null, null);
     }
 

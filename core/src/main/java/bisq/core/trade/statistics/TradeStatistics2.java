@@ -61,6 +61,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -94,7 +95,11 @@ public final class TradeStatistics2 implements ProcessOncePersistableNetworkPayl
         Offer offer = trade.getOffer();
         checkNotNull(offer, "offer must not ne null");
         checkNotNull(trade.getTradeAmount(), "trade.getTradeAmount() must not ne null");
-        return new TradeStatistics2(offer.getOfferPayload(),
+
+        checkArgument(offer.getOfferPayload() instanceof FeeTxOfferPayload);
+        FeeTxOfferPayload offerPayload = (FeeTxOfferPayload) offer.getOfferPayload();
+
+        return new TradeStatistics2(offerPayload,
                 trade.getTradePrice(),
                 trade.getTradeAmount(),
                 trade.getDate(),
