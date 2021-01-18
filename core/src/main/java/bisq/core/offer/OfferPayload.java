@@ -21,11 +21,14 @@ import bisq.network.p2p.storage.payload.ExpirablePayload;
 import bisq.network.p2p.storage.payload.ProtectedStoragePayload;
 import bisq.network.p2p.storage.payload.RequiresOwnerIsOnlinePayload;
 
+import bisq.common.crypto.PubKeyRing;
 import bisq.common.proto.ProtoUtil;
 
 import java.util.concurrent.TimeUnit;
 
 import lombok.EqualsAndHashCode;
+
+import javax.annotation.Nullable;
 
 @EqualsAndHashCode
 public abstract class OfferPayload implements ProtectedStoragePayload, ExpirablePayload, RequiresOwnerIsOnlinePayload {
@@ -57,5 +60,49 @@ public abstract class OfferPayload implements ProtectedStoragePayload, Expirable
         public static protobuf.OfferPayload.Direction toProtoMessage(Direction direction) {
             return protobuf.OfferPayload.Direction.valueOf(direction.name());
         }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // API
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    abstract public protobuf.StoragePayload toProtoMessage();
+    public static OfferPayload fromProto(protobuf.OfferPayload proto) {
+        return FeeTxOfferPayload.fromProto(proto);
+    }
+
+    abstract public long getAmount();
+    abstract public long getMinAmount();
+    // For fiat offer the baseCurrencyCode is BTC and the counterCurrencyCode is the fiat currency
+    // For altcoin offers it is the opposite. baseCurrencyCode is the altcoin and the counterCurrencyCode is BTC.
+    abstract public String getBaseCurrencyCode();
+    abstract public String getCounterCurrencyCode();
+    abstract public long getDate();
+    abstract public Direction getDirection();
+    @Nullable
+    abstract public String getHashOfChallenge();
+    abstract public String getId();
+    abstract public boolean isCurrencyForMakerFeeBtc();
+    // Reserved for possible future use to support private trades where the taker needs to have an accessKey
+    abstract public boolean isPrivateOffer();
+    abstract public long getMakerFee();
+    abstract public String getMakerPaymentAccountId();
+    abstract public long getMaxTradeLimit();
+    abstract public long getMaxTradePeriod();
+
+    abstract public String getPaymentMethodId();
+    abstract public long getPrice();
+    abstract public int getProtocolVersion();
+    abstract public PubKeyRing getPubKeyRing();
+    abstract public String getVersionNr();
+
+    // In the offer we support base and counter currency
+    // Fiat offers have base currency BTC and counterCurrency Fiat
+    // Altcoins have base currency Altcoin and counterCurrency BTC
+    // The rest of the app does not support yet that concept of base currency and counter currencies
+    // so we map here for convenience
+    public String getCurrencyCode() {
+        return getBaseCurrencyCode().equals("BTC") ? getCounterCurrencyCode() : getBaseCurrencyCode();
     }
 }
