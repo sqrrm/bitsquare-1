@@ -53,12 +53,12 @@ public abstract class OfferPayload implements ProtectedStoragePayload, Expirable
         BUY,
         SELL;
 
-        public static OfferPayload.Direction fromProto(protobuf.OfferPayload.Direction direction) {
+        public static OfferPayload.Direction fromProto(protobuf.FeeTxOfferPayload.Direction direction) {
             return ProtoUtil.enumFromProto(OfferPayload.Direction.class, direction.name());
         }
 
-        public static protobuf.OfferPayload.Direction toProtoMessage(Direction direction) {
-            return protobuf.OfferPayload.Direction.valueOf(direction.name());
+        public static protobuf.FeeTxOfferPayload.Direction toProtoMessage(Direction direction) {
+            return protobuf.FeeTxOfferPayload.Direction.valueOf(direction.name());
         }
     }
 
@@ -68,7 +68,7 @@ public abstract class OfferPayload implements ProtectedStoragePayload, Expirable
 
     @Override
     abstract public protobuf.StoragePayload toProtoMessage();
-    public static OfferPayload fromProto(protobuf.OfferPayload proto) {
+    public static OfferPayload fromProto(protobuf.FeeTxOfferPayload proto) {
         return FeeTxOfferPayload.fromProto(proto);
     }
 
